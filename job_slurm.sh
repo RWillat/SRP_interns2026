@@ -2,12 +2,12 @@
 
 # Submit this script with: sbatch thefilename
 
-#SBATCH --time=16:00:00 # walltime
+#SBATCH --time=1:00:00 # walltime
 #SBATCH --ntasks-per-node=1 # number of processor cores (i.e. tasks)
-#SBATCH --nodes=20 # number of nodes
-#SBATCH --mem=50000m
+#SBATCH --nodes=2 # number of nodes
+#SBATCH --mem=500m
 #SBATCH --wckey edu_class # Project Code
-#SBATCH -J "PNSource_test_2DRZ" # job name
+#SBATCH -J "HPMR-GeomTest" # job name
 #SBATCH --mail-user=rdwillat@umich.edu # email address
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
