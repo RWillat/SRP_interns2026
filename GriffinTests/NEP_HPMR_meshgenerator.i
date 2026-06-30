@@ -271,4 +271,5 @@
     transform = ROTATE
     vector_value = '0 0 -120'
   []
+  final_generator = rotate_end
 []
