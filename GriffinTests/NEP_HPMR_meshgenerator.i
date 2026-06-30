@@ -24,11 +24,11 @@
       # The batch parameters here are used to account for these differences
       batch_vector_input_param_names = 'meshes_to_adapt_to sides_to_adapt'
       batch_vector_input_param_types = 'MGNAME UINT'
-      batch_vector_input_param_values = 'Patterned Patterned Patterned;
+      batch_vector_input_param_values = 'Patterned Patterned;
                                          Patterned Patterned;
-                                         Patterned Patterned Patterned;
                                          Patterned Patterned;
-                                         Patterned Patterned Patterned;
+                                         Patterned Patterned;
+                                         Patterned Patterned;
                                          Patterned Patterned;
                                          Patterned Patterned Patterned;
                                          Patterned Patterned;
@@ -36,7 +36,7 @@
                                          Patterned Patterned;
                                          Patterned Patterned Patterned;
                                          Patterned Patterned|
-                                         2 3 4;2 3;1 2 3;1 2;0 1 2;0 1;
+                                         2 3;3 4;4 5;0 5;0 1;1 2;
                                          0 1 5;0 5;0 4 5;4 5;3 4 5;3 4'
       # The rest of the control drum parameters are the same for all control drums
       fixed_vector_input_param_names = 'num_sectors_per_side background_block_ids ring_radii ring_intervals ring_block_ids'
