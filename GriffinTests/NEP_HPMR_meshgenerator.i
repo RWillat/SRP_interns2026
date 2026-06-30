@@ -164,14 +164,14 @@
   [core]
     type = PatternedHexMeshGenerator
     inputs = 'Patterned cd_0 cd_1 cd_2 cd_3 cd_4 cd_5 ref_0 ref_1 ref_2 ref_3 ref_4 ref_5 air_center'
-    # Pattern ID  0       1    2    3    4    5    6     13    14    15    16    17    18      20
+    # Pattern ID  0       1    2    3    4    5    6      7     8     9    10    11    12      13
     pattern_boundary = none
     generate_core_metadata = true
-    pattern =    '15  1 16;
-                6   0  0  2;
-              14  0  20  0 17;
-                5   0  0  3;
-                  13 4 18'
+    pattern =    ' 9  1 10;
+                 6  0  0  2;
+               8  0  13  0 11;
+                 5  0  0  3;
+                   7  4 12'
     rotate_angle = 60
     assign_control_drum_id = true
   []
