@@ -160,25 +160,46 @@
     background_intervals = 2
     background_block_ids = '600 601'
   []
+  # Dummy assembly to help form a regular hexagonal core pattern
+  # This will be deleted after core assembly to produce a single connected outer boundary
+  [dummy]
+    type = HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
+    num_sectors_per_side = '4 4 4 4 4 4'
+    hexagon_size = 13.376
+    background_intervals = 2
+    background_block_ids = '700 701'
+  []
   # Stitching assemblies together to form the core mesh
+  # Ring-2 core (19 cells) is wrapped in a ring-3 shell of dummy tiles so that
+  # BlockDeletionGenerator can produce a single connected outer boundary 10000
+  # required by PeripheralRingMeshGenerator.
   [core]
     type = PatternedHexMeshGenerator
-    inputs = 'Patterned cd_0 cd_1 cd_2 cd_3 cd_4 cd_5 ref_0 ref_1 ref_2 ref_3 ref_4 ref_5 air_center'
-    # Pattern ID  0       1    2    3    4    5    6      7     8     9    10    11    12      13
+    inputs = 'Patterned cd_0 cd_1 cd_2 cd_3 cd_4 cd_5 ref_0 ref_1 ref_2 ref_3 ref_4 ref_5 dummy'
+    # Pattern ID  0       1    2    3    4    5    6   7     8     9    10    11    12    13
     pattern_boundary = none
     generate_core_metadata = true
-    pattern =    ' 9  1 10;
-                 6  0  0  2;
-               8  0  13  0 11;
-                 5  0  0  3;
-                   7  4 12'
+    pattern = '13 13 13 13;
+               13  9  1 10 13;
+               13  6  0  0  2 13;
+               13  8  0  0  0 11 13;
+               13  5  0  0  3 13;
+               13  7  4 12 13;
+               13 13 13 13'
     rotate_angle = 60
     assign_control_drum_id = true
+  []
+  # Delete dummy assemblies; new_boundary = 10000 creates a single connected outer boundary
+  [del_dummy]
+    type = BlockDeletionGenerator
+    block = '700 701'
+    input = core
+    new_boundary = 10000
   []
   # Add peripheral circular region
   [add_outer_shield]
     type = PeripheralRingMeshGenerator
-    input = core
+    input = del_dummy
     peripheral_layer_num = 1
     peripheral_ring_radius = 50.0
     input_mesh_external_boundary = 10000
