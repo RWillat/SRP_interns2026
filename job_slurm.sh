@@ -25,4 +25,4 @@ griffinexec=/hpc-common/moose/containers/griffin-openmpi/2026.02.27-a7e65e5_ee11
 #inputfile=GriffinTests/HPMR_OneSixth_Core_meshgenerator_tri.i
 inputfile=GriffinTests/NEP_HPMR_meshgenerator_tri.i
 
-$mpiexec -n 20 $griffinexec -i $inputfile # > run.log 2&1
+$mpiexec -n 2 $griffinexec -i $inputfile # > run.log 2&1
