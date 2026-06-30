@@ -23,6 +23,6 @@ module load griffin-openmpi
 mpiexec=/apps/local/openmpi/5.0.5-gcc13.2.0-container/bin/mpirun
 griffinexec=/hpc-common/moose/containers/griffin-openmpi/2026.02.27-a7e65e5_ee1118e844308a213b63dfac1474f31ad5597d1e10d92be98e22aa8724c96338/bin/griffin-opt
 #inputfile=GriffinTests/HPMR_OneSixth_Core_meshgenerator_tri.i
-inputfile=GriffinTests/NEP_HPMR_meshgenerator_tri.i
+inputfile=GriffinTests/NEP_HPMR_meshgenerator.i
 
 $mpiexec -n 2 $griffinexec -i $inputfile # > run.log 2&1
