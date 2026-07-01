@@ -1,0 +1,153 @@
+<?xml version='1.0' encoding='utf-8'?>
+<materials>
+  <cross_sections>/home/rdwillat/openmc/XSData/endfb-viii.1-hdf5/cross_sections.xml</cross_sections>
+  <material id="1" name="fuel" depletable="true" volume="1.6607918871148788" temperature="900.0">
+    <density value="10.744" units="g/cm3"/>
+    <nuclide name="U235" ao="0.068794"/>
+    <nuclide name="U238" ao="0.27604"/>
+    <nuclide name="C12" ao="0.13793"/>
+    <nuclide name="O16" ao="0.51724"/>
+  </material>
+  <material id="2" name="buffer" temperature="900.0">
+    <density value="1.04" units="g/cm3"/>
+    <nuclide name="C12" ao="1.0"/>
+  </material>
+  <material id="3" name="PyC1" temperature="900.0">
+    <density value="1.882" units="g/cm3"/>
+    <nuclide name="C12" ao="1.0"/>
+  </material>
+  <material id="4" name="SiC" temperature="900.0">
+    <density value="3.171" units="g/cm3"/>
+    <nuclide name="Si28" ao="0.4611"/>
+    <nuclide name="Si29" ao="0.0234"/>
+    <nuclide name="Si30" ao="0.0154"/>
+    <nuclide name="C12" ao="0.5"/>
+  </material>
+  <material id="5" name="PyC2" temperature="900.0">
+    <density value="1.882" units="g/cm3"/>
+    <nuclide name="C12" ao="1.0"/>
+  </material>
+  <material id="6" name="matrix_pin" temperature="900.0">
+    <density value="1.806" units="g/cm3"/>
+    <nuclide name="C12" ao="0.9999997"/>
+    <nuclide name="B10" ao="3e-07"/>
+    <sab name="c_Graphite"/>
+  </material>
+  <material id="7" name="matrix" temperature="700.0">
+    <density value="1.806" units="g/cm3"/>
+    <nuclide name="C12" ao="0.9999997"/>
+    <nuclide name="B10" ao="3e-07"/>
+    <sab name="c_Graphite"/>
+  </material>
+  <material id="8" name="moderator" temperature="700.0">
+    <density value="4.085" units="g/cm3"/>
+    <nuclide name="Y89" ao="0.357142857"/>
+    <nuclide name="H1" ao="0.642857143"/>
+    <sab name="c_H_in_YH2"/>
+    <sab name="c_Y_in_YH2"/>
+  </material>
+  <material id="9" name="hp_vp_liq_wick" temperature="700.0">
+    <density value="0.008324" units="atom/b-cm"/>
+    <nuclide name="C12" ao="3.808e-06"/>
+    <nuclide name="Si28" ao="1.856e-05"/>
+    <nuclide name="Si29" ao="9.463e-07"/>
+    <nuclide name="Si30" ao="6.242e-07"/>
+    <nuclide name="P31" ao="8.277e-07"/>
+    <nuclide name="S32" ao="4.949e-07"/>
+    <nuclide name="S33" ao="3.908e-09"/>
+    <nuclide name="S34" ao="2.214e-08"/>
+    <nuclide name="S36" ao="6.012e-11"/>
+    <nuclide name="Cr50" ao="1.585e-05"/>
+    <nuclide name="Cr52" ao="0.0003055"/>
+    <nuclide name="Cr53" ao="3.465e-05"/>
+    <nuclide name="Cr54" ao="8.625e-06"/>
+    <nuclide name="Mn55" ao="2.059e-05"/>
+    <nuclide name="Fe54" ao="7.814e-05"/>
+    <nuclide name="Fe56" ao="0.001226"/>
+    <nuclide name="Fe57" ao="2.833e-05"/>
+    <nuclide name="Fe58" ao="2.673e-06"/>
+    <nuclide name="Ni58" ao="0.0001553"/>
+    <nuclide name="Ni60" ao="5.98e-05"/>
+    <nuclide name="Ni61" ao="2.6e-06"/>
+    <nuclide name="Ni62" ao="8.291e-06"/>
+    <nuclide name="Ni64" ao="2.112e-06"/>
+    <nuclide name="Mo92" ao="4.258e-06"/>
+    <nuclide name="Mo94" ao="2.664e-06"/>
+    <nuclide name="Mo95" ao="4.613e-06"/>
+    <nuclide name="Mo96" ao="4.845e-06"/>
+    <nuclide name="Mo97" ao="2.784e-06"/>
+    <nuclide name="Mo98" ao="7.058e-06"/>
+    <nuclide name="Mo100" ao="2.831e-06"/>
+    <nuclide name="K39" ao="0.005895"/>
+    <nuclide name="K40" ao="7.586e-07"/>
+    <nuclide name="K41" ao="0.0004254"/>
+  </material>
+  <material id="10" name="shell_air_hp" temperature="700.0">
+    <density value="0.06771" units="atom/b-cm"/>
+    <nuclide name="He4" ao="5.629e-06"/>
+    <nuclide name="C12" ao="0.0001287"/>
+    <nuclide name="Si28" ao="0.0006276"/>
+    <nuclide name="Si29" ao="3.199e-05"/>
+    <nuclide name="Si30" ao="2.11e-05"/>
+    <nuclide name="P31" ao="2.798e-05"/>
+    <nuclide name="S32" ao="1.673e-05"/>
+    <nuclide name="S33" ao="1.321e-07"/>
+    <nuclide name="S34" ao="7.486e-07"/>
+    <nuclide name="S36" ao="2.032e-09"/>
+    <nuclide name="Cr50" ao="0.0005357"/>
+    <nuclide name="Cr52" ao="0.01033"/>
+    <nuclide name="Cr53" ao="0.001171"/>
+    <nuclide name="Cr54" ao="0.0002916"/>
+    <nuclide name="Mn55" ao="0.000696"/>
+    <nuclide name="Fe54" ao="0.002643"/>
+    <nuclide name="Fe56" ao="0.04145"/>
+    <nuclide name="Fe57" ao="0.0009576"/>
+    <nuclide name="Fe58" ao="9.034e-05"/>
+    <nuclide name="Ni58" ao="0.005248"/>
+    <nuclide name="Ni60" ao="0.002022"/>
+    <nuclide name="Ni61" ao="8.789e-05"/>
+    <nuclide name="Ni62" ao="0.0002802"/>
+    <nuclide name="Ni64" ao="7.139e-05"/>
+    <nuclide name="Mo92" ao="0.0001439"/>
+    <nuclide name="Mo94" ao="9.004e-05"/>
+    <nuclide name="Mo95" ao="0.0001559"/>
+    <nuclide name="Mo96" ao="0.0001638"/>
+    <nuclide name="Mo97" ao="9.413e-05"/>
+    <nuclide name="Mo98" ao="0.0002387"/>
+    <nuclide name="Mo100" ao="9.57e-05"/>
+  </material>
+  <material id="11" name="shell_air_mod" temperature="700.0">
+    <density value="0.0229" units="atom/b-cm"/>
+    <nuclide name="He4" ao="1.983e-05"/>
+    <nuclide name="C12" ao="4.349e-05"/>
+    <nuclide name="Si28" ao="0.0002121"/>
+    <nuclide name="Si29" ao="1.081e-05"/>
+    <nuclide name="Si30" ao="7.13e-06"/>
+    <nuclide name="P31" ao="9.454e-06"/>
+    <nuclide name="S32" ao="5.653e-06"/>
+    <nuclide name="S33" ao="4.464e-08"/>
+    <nuclide name="S34" ao="2.53e-07"/>
+    <nuclide name="S36" ao="6.867e-10"/>
+    <nuclide name="Cr50" ao="0.000181"/>
+    <nuclide name="Cr52" ao="0.003491"/>
+    <nuclide name="Cr53" ao="0.0003958"/>
+    <nuclide name="Cr54" ao="9.852e-05"/>
+    <nuclide name="Mn55" ao="0.0002352"/>
+    <nuclide name="Fe54" ao="0.0008929"/>
+    <nuclide name="Fe56" ao="0.014"/>
+    <nuclide name="Fe57" ao="0.0003236"/>
+    <nuclide name="Fe58" ao="3.053e-05"/>
+    <nuclide name="Ni58" ao="0.001773"/>
+    <nuclide name="Ni60" ao="0.0006831"/>
+    <nuclide name="Ni61" ao="2.97e-05"/>
+    <nuclide name="Ni62" ao="9.469e-05"/>
+    <nuclide name="Ni64" ao="2.412e-05"/>
+    <nuclide name="Mo92" ao="4.864e-05"/>
+    <nuclide name="Mo94" ao="3.043e-05"/>
+    <nuclide name="Mo95" ao="5.269e-05"/>
+    <nuclide name="Mo96" ao="5.535e-05"/>
+    <nuclide name="Mo97" ao="3.181e-05"/>
+    <nuclide name="Mo98" ao="8.065e-05"/>
+    <nuclide name="Mo100" ao="3.234e-05"/>
+  </material>
+</materials>
