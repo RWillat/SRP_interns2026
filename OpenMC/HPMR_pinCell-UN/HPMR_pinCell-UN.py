@@ -1,61 +1,38 @@
 import numpy as np
 import openmc
 
-# Approximate pin-cell replica of SerpentTests/HPMR.sss: a triangular-pitch
-# "flower" unit cell (1 heat pipe pin + ring of 6 alternating fuel/moderator
-# pins, pitch 2.3 cm) with reflective boundaries, for a k-inf check -- not
-# the full core. TRISO particles are stochastically re-packed at PF=40%
-# rather than reusing Serpent's exact coordinate file.
+# Variant of HPMR_pinCell/HPMR_pincell.py: same hex "flower" unit cell, but
+# with the TRISO compact replaced by a solid UN fuel pellet (composition from
+# HPMR_INFINIT.py) clad in SiC, and the fuel/moderator pins' He+steel smeared
+# shells replaced by SiC cladding. Heat pipe pin, matrix, lattice, and tally
+# set are unchanged so the two cases are directly comparable.
 
 ## Materials ##
 mats = {}
 
-mats['fuel'] = openmc.Material(name='fuel')
-mats['fuel'].set_density('g/cm3', 10.7440)
-mats['fuel'].add_nuclide('U235', 6.8794e-02, 'ao')
-mats['fuel'].add_nuclide('U238', 2.7604e-01, 'ao')
-mats['fuel'].add_nuclide('C12', 1.3793e-01, 'ao')
-mats['fuel'].add_nuclide('O16', 5.1724e-01, 'ao')
-mats['fuel'].temperature = 900.0
+# Solid UN fuel pellet (composition/density as in HPMR_INFINIT.py)
+mats['UN'] = openmc.Material(name='UN')
+mats['UN'].add_element('U', 1.0, enrichment=19.50)
+mats['UN'].add_element('N', 1.0)
+density_UN = lambda T: 14.32 / (1 + (6.9E-06 + 1.5E-09 * (T - 298)) * (T - 298))
+mats['UN'].temperature = 900.0
+mats['UN'].set_density('g/cm3', density_UN(mats['UN'].temperature))
 
-mats['buffer'] = openmc.Material(name='buffer')
-mats['buffer'].set_density('g/cm3', 1.0400)
-mats['buffer'].add_nuclide('C12', 1.0, 'ao')
-mats['buffer'].temperature = 900.0
+# SiC cladding (same composition as the TRISO SiC layer in HPMR_pincell.py).
+# Separate instances per pin type so by-material tallies still distinguish
+# fuel-clad from moderator-clad.
+def _sic(name, temperature):
+    m = openmc.Material(name=name)
+    m.set_density('g/cm3', 3.1710)
+    m.add_nuclide('Si28', 0.4611, 'ao')
+    m.add_nuclide('Si29', 0.0234, 'ao')
+    m.add_nuclide('Si30', 0.0154, 'ao')
+    m.add_nuclide('C12', 0.5, 'ao')
+    m.temperature = temperature
+    return m
 
-mats['PyC1'] = openmc.Material(name='PyC1')
-mats['PyC1'].set_density('g/cm3', 1.8820)
-mats['PyC1'].add_nuclide('C12', 1.0, 'ao')
-mats['PyC1'].temperature = 900.0
-
-mats['SiC'] = openmc.Material(name='SiC')
-mats['SiC'].set_density('g/cm3', 3.1710)
-mats['SiC'].add_nuclide('Si28', 0.4611, 'ao')
-mats['SiC'].add_nuclide('Si29', 0.0234, 'ao')
-mats['SiC'].add_nuclide('Si30', 0.0154, 'ao')
-mats['SiC'].add_nuclide('C12', 0.5, 'ao')
-mats['SiC'].temperature = 900.0
-
-mats['PyC2'] = openmc.Material(name='PyC2')
-mats['PyC2'].set_density('g/cm3', 1.8820)
-mats['PyC2'].add_nuclide('C12', 1.0, 'ao')
-mats['PyC2'].temperature = 900.0
-
-# Graphite background inside the TRISO compact
-mats['matrix_pin'] = openmc.Material(name='matrix_pin')
-mats['matrix_pin'].set_density('g/cm3', 1.8060)
-mats['matrix_pin'].add_nuclide('C12', 0.9999997, 'ao')
-mats['matrix_pin'].add_nuclide('B10', 0.0000003, 'ao')
-mats['matrix_pin'].add_s_alpha_beta('c_Graphite')
-mats['matrix_pin'].temperature = 900.0
-
-# Graphite filling the rest of each pin cell outside the compact
-mats['matrix'] = openmc.Material(name='matrix')
-mats['matrix'].set_density('g/cm3', 1.8060)
-mats['matrix'].add_nuclide('C12', 0.9999997, 'ao')
-mats['matrix'].add_nuclide('B10', 0.0000003, 'ao')
-mats['matrix'].add_s_alpha_beta('c_Graphite')
-mats['matrix'].temperature = 700.0
+mats['SiC_fuel_clad'] = _sic('SiC_fuel_clad', 900.0)
+mats['SiC_mod_clad'] = _sic('SiC_mod_clad', 700.0)
 
 mats['moderator'] = openmc.Material(name='moderator')
 mats['moderator'].set_density('g/cm3', 4.0850)
@@ -64,6 +41,13 @@ mats['moderator'].add_nuclide('H1', 0.642857143, 'ao')
 mats['moderator'].add_s_alpha_beta('c_H_in_YH2')
 mats['moderator'].add_s_alpha_beta('c_Y_in_YH2')
 mats['moderator'].temperature = 700.0
+
+mats['matrix'] = openmc.Material(name='matrix')
+mats['matrix'].set_density('g/cm3', 1.8060)
+mats['matrix'].add_nuclide('C12', 0.9999997, 'ao')
+mats['matrix'].add_nuclide('B10', 0.0000003, 'ao')
+mats['matrix'].add_s_alpha_beta('c_Graphite')
+mats['matrix'].temperature = 700.0
 
 # Heat pipe working fluid (Na vapor/liquid + wick), homogenized
 mats['hp_vp_liq_wick'] = openmc.Material(name='hp_vp_liq_wick')
@@ -106,107 +90,56 @@ mats['shell_air_hp'] = _he_steel_mix('shell_air_hp', 6.771e-02, [
     ('Mo97', 9.413e-05), ('Mo98', 2.387e-04), ('Mo100', 9.570e-05),
 ])
 
-# Smeared He gas + stainless steel annulus around the moderator pin
-mats['shell_air_mod'] = _he_steel_mix('shell_air_mod', 2.290e-02, [
-    ('He4', 1.983e-05), ('C12', 4.349e-05),
-    ('Si28', 2.121e-04), ('Si29', 1.081e-05), ('Si30', 7.130e-06),
-    ('P31', 9.454e-06),
-    ('S32', 5.653e-06), ('S33', 4.464e-08), ('S34', 2.530e-07), ('S36', 6.867e-10),
-    ('Cr50', 1.810e-04), ('Cr52', 3.491e-03), ('Cr53', 3.958e-04), ('Cr54', 9.852e-05),
-    ('Mn55', 2.352e-04),
-    ('Fe54', 8.929e-04), ('Fe56', 1.400e-02), ('Fe57', 3.236e-04), ('Fe58', 3.053e-05),
-    ('Ni58', 1.773e-03), ('Ni60', 6.831e-04), ('Ni61', 2.970e-05), ('Ni62', 9.469e-05), ('Ni64', 2.412e-05),
-    ('Mo92', 4.864e-05), ('Mo94', 3.043e-05), ('Mo95', 5.269e-05), ('Mo96', 5.535e-05),
-    ('Mo97', 3.181e-05), ('Mo98', 8.065e-05), ('Mo100', 3.234e-05),
-])
-
 materials = openmc.Materials(mats.values())
 materials.cross_sections = '/home/rdwillat/openmc/XSData/endfb-viii.1-hdf5/cross_sections.xml'
-# Exported after the fuel volume is set below, but before the geometry plot,
-# which needs materials.xml on disk.
+# Exported after the UN fuel volume is set below, but before the geometry
+# plot, which needs materials.xml on disk.
 
 ## Geometry ##
 
 pitch = 2.3     # cm, triangular pin pitch
 h_pin = 4.0     # cm, axial slice height of the reflective unit cell
-pf = 0.40       # TRISO packing fraction
 
-# TRISO layer radii, cm
-r_kernel = 0.02125
-r_buffer = 0.03125
-r_PyC1 = 0.03525
-r_SiC = 0.03875
-r_PyC2 = 0.04275
+# Fuel pin: solid UN pellet clad in SiC. Clad outer radius matches the old
+# TRISO compact envelope (r_compact = 1.00 cm) so the pin keeps the same
+# footprint as HPMR_pincell.py's fuel_pin.
+r_fuel_clad = 1.00
+t_fuel_clad = 0.05
+r_fuel_core = r_fuel_clad - t_fuel_clad
 
-r_compact = 1.00
+# Moderator pin: same core/shell radii as HPMR_pincell.py, shell swapped from
+# He+steel smear to SiC.
 r_mod_core = 0.825
-r_mod_shell = 0.92
+r_mod_clad = 0.92
+
+# Heat pipe pin: unchanged from HPMR_pincell.py.
 r_hp_core = 0.97
 r_hp_shell = 1.07
 
 z_lo = openmc.ZPlane(z0=-h_pin / 2, boundary_type='reflective')
 z_hi = openmc.ZPlane(z0=h_pin / 2, boundary_type='reflective')
 
-# TRISO particle: concentric fuel/buffer/PyC1/SiC/PyC2 spheres
-s_kernel = openmc.Sphere(r=r_kernel)
-s_buffer = openmc.Sphere(r=r_buffer)
-s_PyC1 = openmc.Sphere(r=r_PyC1)
-s_SiC = openmc.Sphere(r=r_SiC)
-s_PyC2 = openmc.Sphere(r=r_PyC2)
-
-triso_universe = openmc.Universe(cells=[
-    openmc.Cell(fill=mats['fuel'], region=-s_kernel),
-    openmc.Cell(fill=mats['buffer'], region=+s_kernel & -s_buffer),
-    openmc.Cell(fill=mats['PyC1'], region=+s_buffer & -s_PyC1),
-    openmc.Cell(fill=mats['SiC'], region=+s_PyC1 & -s_SiC),
-    openmc.Cell(fill=mats['PyC2'], region=+s_SiC & -s_PyC2),
+s_fuel_core = openmc.ZCylinder(r=r_fuel_core)
+s_fuel_clad = openmc.ZCylinder(r=r_fuel_clad)
+fuel_pin = openmc.Universe(cells=[
+    openmc.Cell(region=-s_fuel_core, fill=mats['UN']),
+    openmc.Cell(region=+s_fuel_core & -s_fuel_clad, fill=mats['SiC_fuel_clad']),
+    openmc.Cell(region=+s_fuel_clad, fill=mats['matrix']),
 ])
-
-s_compact = openmc.ZCylinder(r=r_compact)
-
-# Pack spheres shrunk by r_PyC2 on every side so no TRISO particle's outer
-# surface extends past the compact (otherwise OpenMC warns of a particle
-# outside the lattice).
-s_pack = openmc.ZCylinder(r=r_compact - r_PyC2)
-z_pack_lo = openmc.ZPlane(z0=-h_pin / 2 + r_PyC2)
-z_pack_hi = openmc.ZPlane(z0=h_pin / 2 - r_PyC2)
-pack_region = -s_pack & +z_pack_lo & -z_pack_hi
-triso_centers = openmc.model.pack_spheres(radius=r_PyC2, region=pack_region, pf=pf)
-trisos = [openmc.model.TRISO(r_PyC2, triso_universe, c) for c in triso_centers]
 
 # fuel_pin is instanced 3 times in the hex flower below, and material-filter
 # tallies sum over all instances, so the fuel volume must count every pin.
 n_fuel_pins = 3  # positions 0, 2, 4 of the 6-pin outer ring (see hex_lattice)
-n_kernels = len(triso_centers)
-mats['fuel'].volume = n_fuel_pins * n_kernels * (4.0 / 3.0) * np.pi * r_kernel ** 3
+mats['UN'].volume = n_fuel_pins * np.pi * r_fuel_core ** 2 * h_pin
 
-n_xy = 10
-n_z = max(1, round(h_pin / (2 * r_compact / n_xy)))
-triso_lattice = openmc.model.create_triso_lattice(
-    trisos,
-    lower_left=(-r_compact, -r_compact, -h_pin / 2),
-    pitch=(2 * r_compact / n_xy, 2 * r_compact / n_xy, h_pin / n_z),
-    shape=(n_xy, n_xy, n_z),
-    background=mats['matrix_pin'],
-)
-triso_lattice.outer = openmc.Universe(cells=[openmc.Cell(fill=mats['matrix_pin'])])
-
-# Fuel compact pin
-fuel_pin = openmc.Universe(cells=[
-    openmc.Cell(region=-s_compact, fill=triso_lattice),
-    openmc.Cell(region=+s_compact, fill=mats['matrix']),
-])
-
-# Moderator pin
 s_mod_core = openmc.ZCylinder(r=r_mod_core)
-s_mod_shell = openmc.ZCylinder(r=r_mod_shell)
+s_mod_clad = openmc.ZCylinder(r=r_mod_clad)
 mod_pin = openmc.Universe(cells=[
     openmc.Cell(region=-s_mod_core, fill=mats['moderator']),
-    openmc.Cell(region=+s_mod_core & -s_mod_shell, fill=mats['shell_air_mod']),
-    openmc.Cell(region=+s_mod_shell, fill=mats['matrix']),
+    openmc.Cell(region=+s_mod_core & -s_mod_clad, fill=mats['SiC_mod_clad']),
+    openmc.Cell(region=+s_mod_clad, fill=mats['matrix']),
 ])
 
-# Heat pipe pin
 s_hp_core = openmc.ZCylinder(r=r_hp_core)
 s_hp_shell = openmc.ZCylinder(r=r_hp_shell)
 hp_pin = openmc.Universe(cells=[
@@ -267,7 +200,7 @@ tally_absorption.filters = [mat_filter_all]
 tally_absorption.scores = ['absorption']
 tallies.append(tally_absorption)
 
-mat_filter_fuel = openmc.MaterialFilter([mats['fuel']])
+mat_filter_fuel = openmc.MaterialFilter([mats['UN']])
 tally_fission = openmc.Tally(name='fission-in-fuel')
 tally_fission.filters = [mat_filter_fuel]
 tally_fission.scores = ['fission', 'nu-fission', 'kappa-fission']
@@ -278,13 +211,13 @@ tally_heating.filters = [mat_filter_all]
 tally_heating.scores = ['heating-local']
 tallies.append(tally_heating)
 
-# 11-group structure from Serpent's `set nfg` card (MeV -> eV, with 1e-5 eV /
-# 20 MeV as the overall bounds)
+# Same 11-group energy structure as HPMR_pincell.py/HPMR_INFINIT.py, for
+# direct comparison
 energy_bins = [1.0e-5, 8.00e-2, 1.80e-1, 6.25e-1, 1.30e+0, 4.00e+0,
                1.4873e+2, 9.118e+3, 1.83e+5, 5.00e+5, 1.353e+6, 2.0e+7]
 energy_filter = openmc.EnergyFilter(energy_bins)
-spectrum_materials = [mats['fuel'], mats['moderator'], mats['hp_vp_liq_wick'],
-                      mats['matrix'], mats['matrix_pin']]
+spectrum_materials = [mats['UN'], mats['moderator'], mats['hp_vp_liq_wick'],
+                      mats['matrix'], mats['SiC_fuel_clad']]
 mat_filter_spectrum = openmc.MaterialFilter(spectrum_materials)
 tally_spectrum = openmc.Tally(name='flux-spectrum-by-region')
 tally_spectrum.filters = [mat_filter_spectrum, energy_filter]
@@ -307,5 +240,3 @@ tally_mesh_heating.scores = ['heating-local']
 tallies.append(tally_mesh_heating)
 
 tallies.export_to_xml()
-
-# openmc.run()

@@ -3,7 +3,6 @@ import openmc
 
 ## Materials ##
 mats = {}
-# UN Fuel
 mats['UN'] = openmc.Material(name='UN')
 mats['UN'].add_element('U', 1.0, enrichment=19.50)
 mats['UN'].add_element('N', 1.0)
@@ -11,7 +10,7 @@ density_UN = lambda T: 14.32 / (1 + (6.9E-06+1.5E-09*(T - 298))*(T - 298))
 T_UN = 900. # K
 mats['UN'].temperature = T_UN
 mats['UN'].set_density('g/cm3', density_UN(mats['UN'].temperature))
-# YH2
+
 mats['YH2'] = openmc.Material(name='YH2')
 mats['YH2'].add_element('Y', 1.0)
 mats['YH2'].add_element('H', 2.0)
@@ -19,14 +18,14 @@ density_YH2 = lambda T: 4.085  #FIXME
 T_YH2 = 900. # K
 mats['YH2'].temperature = T_YH2
 mats['YH2'].set_density('g/cm3', density_YH2(mats['YH2'].temperature))
-# Na - Gas
+
 mats['NaGas'] = openmc.Material(name='NaGas')
 mats['NaGas'].add_element('Na', 1.0)
 density_NaGas = lambda T: 0.7266  #FIXME
 T_NaGas = 1200. # K
 mats['NaGas'].temperature = T_NaGas
 mats['NaGas'].set_density('g/cm3', density_NaGas(mats['NaGas'].temperature))
-# ZrHx Wick (x ~ 1.6)
+
 mats['ZrHx'] = openmc.Material(name='ZrHx')
 mats['ZrHx'].add_element('Zr', 1.0)
 mats['ZrHx'].add_element('H', 1.6)
@@ -34,21 +33,21 @@ density_ZrHx = lambda T: 5.66  #FIXME
 T_ZrHx = 1000. # K
 mats['ZrHx'].temperature = T_ZrHx
 mats['ZrHx'].set_density('g/cm3', density_ZrHx(mats['ZrHx'].temperature))
-# Na - liquid
+
 mats['NaLiquid'] = openmc.Material(name='NaLiquid')
 mats['NaLiquid'].add_element('Na', 1.0)
 density_NaLiquid = lambda T: 0.970  #FIXME
 T_NaLiquid = 900. # K
 mats['NaLiquid'].temperature = T_NaLiquid
 mats['NaLiquid'].set_density('g/cm3', density_NaLiquid(mats['NaLiquid'].temperature))
-# Nb
+
 mats['Nb'] = openmc.Material(name='Nb')
 mats['Nb'].add_element('Nb', 1.0)
 density_Nb = lambda T: 8.57  #FIXME
 T_Nb = 900. # K
 mats['Nb'].temperature = T_Nb
 mats['Nb'].set_density('g/cm3', density_Nb(mats['Nb'].temperature))
-# SiC
+
 mats['SiC'] = openmc.Material(name='SiC')
 mats['SiC'].add_element('Si', 1.0)
 mats['SiC'].add_element('C' , 1.0)
@@ -56,14 +55,14 @@ density_SiC = lambda T: 3.16  #FIXME
 T_SiC = 900. # K
 mats['SiC'].temperature = T_SiC
 mats['SiC'].set_density('g/cm3', density_SiC(mats['SiC'].temperature))
-# W
+
 mats['W'] = openmc.Material(name='W')
 mats['W'].add_element('W', 1.0)
 density_W = lambda T: 19.25  #FIXME
 T_W = 900. # K
 mats['W'].temperature = T_W
 mats['W'].set_density('g/cm3', density_W(mats['W'].temperature))
-#
+
 volFracs_VHTM = {
     mats['NaGas']   :(0.70**2)/1.02**2,
     mats['ZrHx']    :(0.90**2-0.70**2)/1.02**2,
@@ -72,11 +71,11 @@ volFracs_VHTM = {
     mats['SiC']     :(1.00**2-0.95**2)/1.02**2,
     mats['W']       :(1.02**2-1.01**2)/1.02**2,
 }
-#
+
 materials_file = openmc.Materials(mats.values())
 materials_file.cross_sections = '/home/rdwillat/openmc/XSData/endfb-viii.1-hdf5/cross_sections.xml'
-# materials_file.export_to_xml() is deferred to the end of the script, once
-# the UN fuel volume (needed for the specific-power postprocessing) is known.
+# Exported after the UN fuel volume is set below, but before the geometry
+# plot, which needs materials.xml on disk.
 
 ## Geometry ##
 h_fuel     =   40.0
@@ -114,17 +113,17 @@ for i in range(6):
     ny = np.sin(theta)
     planes_mod+=[openmc.Plane(
         name=f'modPlane{i}',
-        a=nx, b=ny, c=0.0, 
+        a=nx, b=ny, c=0.0,
         d=apothem-t_envelope2-t_liner2
     )]
     planes_liner+=[openmc.Plane(
         name=f'NbLinerPlane{i}',
-        a=nx, b=ny, c=0.0, 
+        a=nx, b=ny, c=0.0,
         d=apothem-t_envelope2
     )]
     planes_envelope+=[openmc.Plane(
         name=f'envelopePlane{i}',
-        a=nx, b=ny, c=0.0, 
+        a=nx, b=ny, c=0.0,
         d=apothem,
         boundary_type='reflective'
     )]
@@ -133,9 +132,9 @@ hexReg_liner = -planes_liner[0] & -planes_liner[1] & -planes_liner[2] & -planes_
 hexReg_envelope = -planes_envelope[0] & -planes_envelope[1] & -planes_envelope[2] & -planes_envelope[3] & -planes_envelope[4] & -planes_envelope[5]
 # Cells
 c_HPvap   = openmc.Cell(
-    name  ='HPvap'    , 
-    fill  =mats['NaGas']   , 
-    region= -s_HPvap 
+    name  ='HPvap'    ,
+    fill  =mats['NaGas']   ,
+    region= -s_HPvap
           & +s_bot & -s_top
 )
 c_HPwick  = openmc.Cell(
@@ -181,8 +180,7 @@ c_Fuel = openmc.Cell(
           & +s_bot & -s_top
 )
 # Exact UN fuel volume (annulus between s_WLiner1 and s_Fuel, full h_fuel
-# height), for the specific-power (fission energy per loaded uranium mass)
-# postprocessing metric.
+# height), needed for the specific-power postprocessing metric.
 mats['UN'].volume = np.pi * (s_Fuel.r ** 2 - s_WLiner1.r ** 2) * h_fuel
 c_WLiner2 = openmc.Cell(
     name  ='WLiner2' ,
@@ -235,10 +233,11 @@ pin_cell_universe = openmc.Universe(
     universe_id=0,
     cells=cells,
 )
-# Export
 geometry_file = openmc.Geometry(root=pin_cell_universe)
 geometry_file.export_to_xml()
-## Visualization ##
+materials_file.export_to_xml()
+
+## Plot ##
 plot = openmc.Plot()
 plot.filename = 'pincell'
 plot.width = (p_pincell * 1.1, p_pincell * 1.1)
@@ -246,6 +245,7 @@ plot.pixels = (1200, 1200)
 plot.color_by = 'material'
 plot.to_ipython_image()
 openmc.Plots([plot]).export_to_xml()
+
 ## Settings ##
 settings = openmc.Settings()
 settings.run_mode = 'eigenvalue'
@@ -258,29 +258,25 @@ settings.export_to_xml()
 ## Tallies ##
 tallies = openmc.Tallies()
 
-# Absorption rate broken out by material
 mat_filter_all = openmc.MaterialFilter(list(mats.values()))
 tally_absorption = openmc.Tally(name='absorption-by-material')
 tally_absorption.filters = [mat_filter_all]
 tally_absorption.scores = ['absorption']
 tallies.append(tally_absorption)
 
-# Fission rate in the UN fuel
 mat_filter_fuel = openmc.MaterialFilter([mats['UN']])
 tally_fission = openmc.Tally(name='fission-in-fuel')
 tally_fission.filters = [mat_filter_fuel]
 tally_fission.scores = ['fission', 'nu-fission', 'kappa-fission']
 tallies.append(tally_fission)
 
-# Heating rate broken out by material
 tally_heating = openmc.Tally(name='heating-by-material')
 tally_heating.filters = [mat_filter_all]
 tally_heating.scores = ['heating-local']
 tallies.append(tally_heating)
 
-# Flux energy spectra in key regions, using the same 11-group structure as
-# HPMR_pinCell/HPMR_pincell.py (converted MeV -> eV, with 1e-5 eV / 20 MeV
-# as the overall lower/upper bounds) so the two cases can be compared directly
+# Same 11-group energy structure (MeV -> eV converted) as the pinCell cases,
+# for direct comparison
 energy_bins = [1.0e-5, 8.00e-2, 1.80e-1, 6.25e-1, 1.30e+0, 4.00e+0,
                1.4873e+2, 9.118e+3, 1.83e+5, 5.00e+5, 1.353e+6, 2.0e+7]
 energy_filter = openmc.EnergyFilter(energy_bins)
@@ -292,7 +288,6 @@ tally_spectrum.filters = [mat_filter_spectrum, energy_filter]
 tally_spectrum.scores = ['flux']
 tallies.append(tally_spectrum)
 
-# Spatial flux distribution over the pin cell footprint
 mesh = openmc.RegularMesh()
 mesh.dimension = (200, 200, 1)
 mesh.lower_left = (-p_pincell / 2 * 1.05, -p_pincell / 2 * 1.05, -h_fuel / 2)
@@ -303,12 +298,9 @@ tally_mesh_flux.filters = [mesh_filter]
 tally_mesh_flux.scores = ['flux']
 tallies.append(tally_mesh_flux)
 
-# Spatial heating distribution over the same mesh
 tally_mesh_heating = openmc.Tally(name='heating-mesh')
 tally_mesh_heating.filters = [mesh_filter]
 tally_mesh_heating.scores = ['heating-local']
 tallies.append(tally_mesh_heating)
 
 tallies.export_to_xml()
-
-materials_file.export_to_xml()
